@@ -11,7 +11,7 @@
                 <div class="border-b border-gray-200 bg-white p-6">
                     <ul class="">
                         @forelse ($users as $user)
-                            <li class="text-gray-800">{{ $user->name }}</li>
+                            <li class="text-gray-800">{{ $user->name }} : {{ $user->email }}</li>
 
                         @empty
                             <li>Pas d'utilisateur dans la base de donnée</li>
