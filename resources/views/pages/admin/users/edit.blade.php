@@ -50,6 +50,18 @@
                                 {{ $role->name }}</label>
                         </div>
                     @endforeach
+
+                    @if (Auth::user()->isSuperAdmin())
+                        <div>
+
+                            <input type="checkbox" name="roles[]" value="{{ Auth::user()->getSuperAdminRole()->id }}"
+                                id="{{ Auth::user()->getSuperAdminRole()->id }}"
+                                {{ Auth::user()->id === $user->id ? 'checked' : '' }}
+                                class="mr-1 scale-125 border border-gray-700">
+                            <label for="{{ Auth::user()->getSuperAdminRole()->id }}" class="ml-1 text-gray-800">
+                                {{ Auth::user()->getSuperAdminRole()->name }}</label>
+                        </div>
+                    @endif
                 </div>
             @endif
 

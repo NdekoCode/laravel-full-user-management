@@ -53,25 +53,71 @@ class User extends Authenticatable
         return $this->firstname . ' ' . $this->lastname;
     }
 
+    /**
+     * Verifie si l'utilisateur est un admin
+     *
+     * @return boolean
+     */
     public function isAdmin()
     {
         return $this->roles()->where('name', 'admin')->exists();
     }
+    /**
+     * Verifie si l'utilisateur est un editeur
+     *
+     * @return boolean
+     */
     public function isEditor()
     {
         return $this->roles()->where('name', 'editor')->exists();
     }
 
+    /**
+     * Verifie si l'utilisateur est un super admin
+     *
+     * @return boolean
+     */
     public function isSuperAdmin()
     {
         return $this->roles()->where('name', 'super_admin')->exists();
     }
+
+    /**
+     * Verifie si l'utilisateur a les droit de modification
+     *
+     * @return boolean
+     */
     public function canUpload()
     {
         return $this->isEditor() || $this->isAdmin() || $this->isSuperAdmin();
     }
+
+    /**
+     * Verifie si l'utilisateur a les droit des vip comme les admin ou superAdmin
+     *
+     * @return boolean
+     */
     public function canDoVIPActions()
     {
         return $this->isAdmin() || $this->isSuperAdmin();
+    }
+
+    /**
+     * Recupere le role Admin
+     *
+     * @return Role
+     */
+    public function getAdminRole()
+    {
+        return $this->roles()->where('name', 'admin')->first();
+    }
+    /**
+     * Recupere le role SuperAdmin
+     *
+     * @return Role
+     */
+    public function getSuperAdminRole()
+    {
+        return $this->roles()->where('name', 'super_admin')->first();
     }
 }

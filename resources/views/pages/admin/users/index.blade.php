@@ -129,8 +129,16 @@
                                                 <td class="border-b border-gray-200 bg-white px-5 py-5 text-sm">
                                                     <p class="whitespace-no-wrap text-gray-900">
                                                         <span class="m-1">
+                                                            {{-- <span class="m-1">
+                                                            {{ implode(', ',$user->roles()->get()->pluck('name')->toArray()) }}
+                                                        </span> --}}
                                                             @foreach ($user->roles as $role)
-                                                                {{ $role->name }}
+                                                                <span
+                                                                    class="{{ $role->name === 'admin' || $role->name == 'super_admin' ? 'text-white ' : ' text-green-900 ' }} relative m-1 inline-block px-3 py-1 font-semibold leading-tight">
+                                                                    <span aria-hidden
+                                                                        class="{{ $role->name === 'admin' || $role->name == 'super_admin' ? ' bg-blue-600 ' : 'bg-green-200 ' }} absolute inset-0 rounded-full opacity-60"></span>
+                                                                    <span class="relative">{{ $role->name }}</span>
+                                                                </span>
                                                             @endforeach
                                                         </span>
                                                     </p>
@@ -142,9 +150,15 @@
                                                 </td>
                                                 <td
                                                     class="flex items-center border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                                                    <a href="{{ route('admin.users.edit', $user->id) }}"
-                                                        class="m-1 rounded-md border border-transparent bg-blue-600 p-2 text-white transition-all duration-200 hover:border-blue-600 hover:bg-transparent hover:text-blue-600">Editer</a>
-                                                    @if (Auth::user()->canDoVIPActions())
+                                                    @if (Auth::user()->id === $user->id || (Auth::user()->canDoVIPActions() && !$user->isSuperAdmin()))
+                                                        <a href="{{ route('admin.users.edit', $user->id) }}"
+                                                            class="m-1 rounded-md border border-transparent bg-blue-600 p-2 text-white transition-all duration-200 hover:border-blue-600 hover:bg-transparent hover:text-blue-600">Editer</a>
+                                                    @else
+                                                        <a href="{{ route('admin.users.show', $user->id) }}"
+                                                            class="m-1 rounded-md border border-transparent bg-blue-600 p-2 text-white transition-all duration-200 hover:border-blue-600 hover:bg-transparent hover:text-blue-600">View
+                                                            Profile</a>
+                                                    @endif
+                                                    @if (Auth::user()->canDoVIPActions() && Auth::user()->id !== $user->id && !$user->isSuperAdmin())
                                                         <form method="POST"
                                                             action="{{ route('admin.users.destroy', $user->id) }}">
                                                             @csrf
@@ -154,6 +168,7 @@
                                                                 class="m-1 rounded-md border border-transparent bg-red-600 p-2 text-white transition-all duration-200 hover:border-red-600 hover:bg-transparent hover:text-red-600">Delete</button>
                                                         </form>
                                                     @endif
+
                                                 </td>
                                             </tr>
                                         @empty

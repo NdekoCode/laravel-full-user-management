@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class UsersController extends Controller
 {
@@ -65,6 +67,7 @@ class UsersController extends Controller
      */
     public function edit(User $user)
     {
+
         $roles = Role::where('name', '!=', 'super_admin')->get();
         return view('pages.admin.users.edit', compact('user', 'roles'));
     }
@@ -90,11 +93,16 @@ class UsersController extends Controller
         $roleUser = [];
 
         $roles = Role::find($request->roles);
-        foreach ($roles as $role) {
-            if ($role->name === 'super_admin') {
-                continue;
+        if (!Auth::user()->isSuperAdmin()) {
+
+            foreach ($roles as $role) {
+                if ($role->name === 'super_admin') {
+                    continue;
+                }
+                $roleUser[] = $role->id;
             }
-            $roleUser[] = $role->id;
+        } else {
+            $roleUser = $roles->pluck('id')->toArray();
         }
         if (empty($userEmail->email) || $user->email === $userEmail->email) {
             $user->update($userData);
@@ -114,6 +122,20 @@ class UsersController extends Controller
      */
     public function destroy(User $user)
     {
+        if ($user->isAdmin() && !Auth::user()->isSuperAdmin()) {
+
+            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
+        }
+
+        if ($user->isSuperAdmin()) {
+
+            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
+        }
+        if (!Gate::allows('vip-access')) {
+            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
+        }
+
+        $user->roles()->detach();
         $user->delete();
         return redirect()->route('admin.users.index')->with('success', "Utilisateur supprimer");
     }
