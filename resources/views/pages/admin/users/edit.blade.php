@@ -51,7 +51,7 @@
                         </div>
                     @endforeach
 
-                    @if (Auth::user()->isSuperAdmin())
+                    @if (Auth::user()->isCapable($user) || Auth::user()->id !== $user->id)
                         <div>
 
                             <input type="checkbox" name="roles[]" value="{{ Auth::user()->getSuperAdminRole()->id }}"

@@ -23,6 +23,9 @@ class UsersController extends Controller
      */
     public function index()
     {
+        if (!Gate::allows('vip-access')) {
+            return redirect()->route('admin.users.show', Auth()->user()->id)->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
+        }
         $users = User::latest()->paginate(9);
         return view('pages.admin.users.index', compact('users'));
     }
