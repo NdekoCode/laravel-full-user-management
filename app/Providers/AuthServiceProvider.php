@@ -28,9 +28,25 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('superAdmin-access', function (User $user) {
             return $user->isSuperAdmin();
         });
-
+        Gate::define('edit-user', function (User $user, $userEntry) {
+            if ($user->id === $userEntry->id) {
+                return true;
+            }
+            return Gate::allows('is-priority', $userEntry);
+        });
+        Gate::define('is-priority', function (User $user, User $userEntry) {
+            if ($user->isSuperAdmin() && !$userEntry->isSuperAdmin()) {
+                return true;
+            } else if ($user->isAdmin() && !$userEntry->isAdmin() && !$userEntry->isSuperAdmin()) {
+                return true;
+            }
+            if ($user->isSuperAdmin() && $userEntry->isSuperAdmin()) {
+                return false;
+            }
+            return false;
+        });
         Gate::define('vip-access', function (User $user) {
-            return $user->isSuperAdmin() || $user->isAdmin();;
+            return $user->canDoVIPActions();
         });
         Gate::define('Admin-access', function (User $user) {
             return $user->isAdmin();

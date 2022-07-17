@@ -67,7 +67,9 @@ class UsersController extends Controller
      */
     public function edit(User $user)
     {
-
+        if (!Gate::allows('edit-user', $user)) {
+            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
+        }
         $roles = Role::where('name', '!=', 'super_admin')->get();
         return view('pages.admin.users.edit', compact('user', 'roles'));
     }
@@ -81,6 +83,9 @@ class UsersController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        if (!Gate::allows('edit-user', $user)) {
+            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
+        }
         $userData = $request->validate([
             'firstname' => 'required|string|min:2|max:50',
             'lastname' => 'required|string|min:2|max:50',
@@ -93,7 +98,7 @@ class UsersController extends Controller
         $roleUser = [];
 
         $roles = Role::find($request->roles);
-        if (!Auth::user()->isSuperAdmin()) {
+        if (!Gate::allows('superAdmin-access')) {
 
             foreach ($roles as $role) {
                 if ($role->name === 'super_admin') {
@@ -122,16 +127,8 @@ class UsersController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->isAdmin() && !Auth::user()->isSuperAdmin()) {
+        if (!Gate::allows('is-priority', $user)) {
 
-            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
-        }
-
-        if ($user->isSuperAdmin()) {
-
-            return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
-        }
-        if (!Gate::allows('vip-access')) {
             return redirect()->route('admin.users.index')->with('warning', "Vous n'etes pas autoriser à effectuer cette action");
         }
 
