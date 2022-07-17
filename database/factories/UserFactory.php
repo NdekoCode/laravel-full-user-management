@@ -15,10 +15,14 @@ class UserFactory extends Factory
      */
     public function definition()
     {
+        $firstName = $this->faker->unique()->firstName;
+        $lastName = $this->faker->unique()->lastName;
         return [
-            'name' => $this->faker->unique()->name(),
+            'firstname' => $firstName,
+            'lastname' => $lastName,
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'avatar' => $this->faker->image(public_path('img/users'), 150, 150, "user", false, false, substr($firstName, 0, 1)),
             'password' => Hash::make('12345678'), // password
             'remember_token' => Str::random(10),
         ];

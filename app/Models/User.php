@@ -18,7 +18,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'firstname',
+        'lastname',
         'email',
         'password',
     ];
@@ -45,5 +46,32 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function fullname()
+    {
+        return $this->firstname . ' ' . $this->lastname;
+    }
+
+    public function isAdmin()
+    {
+        return $this->roles()->where('name', 'admin')->exists();
+    }
+    public function isEditor()
+    {
+        return $this->roles()->where('name', 'editor')->exists();
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->roles()->where('name', 'super_admin')->exists();
+    }
+    public function canUpload()
+    {
+        return $this->isEditor() || $this->isAdmin() || $this->isSuperAdmin();
+    }
+    public function canDoVIPActions()
+    {
+        return $this->isAdmin() || $this->isSuperAdmin();
     }
 }

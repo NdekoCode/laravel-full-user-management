@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -53,7 +54,7 @@ class UsersController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return view('pages.admin.users.show', compact('user'));
     }
 
     /**
@@ -64,7 +65,8 @@ class UsersController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        $roles = Role::where('name', '!=', 'super_admin')->get();
+        return view('pages.admin.users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -76,7 +78,32 @@ class UsersController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $userData = $request->validate([
+            'firstname' => 'required|string|min:2|max:50',
+            'lastname' => 'required|string|min:2|max:50',
+            'email' => 'email|required',
+            'roles' => 'exists:roles,id'
+        ]);
+
+        // dd($user->roles()->where('role_id', $request->roles)->exists());
+        $userEmail = User::where('email', $request->email)->first();
+        $roleUser = [];
+
+        $roles = Role::find($request->roles);
+        foreach ($roles as $role) {
+            if ($role->name === 'super_admin') {
+                continue;
+            }
+            $roleUser[] = $role->id;
+        }
+        if (empty($userEmail->email) || $user->email === $userEmail->email) {
+            $user->update($userData);
+            $user->roles()->sync($roleUser);
+
+            // if ($user->roles()->where('role_id', $request->roles)->exists())
+            return redirect()->route('dashboard')->with('success', "Utilisateur modifier avec succés");
+        }
+        return back()->with('error', 'Email déjà pris');
     }
 
     /**
@@ -87,6 +114,7 @@ class UsersController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return redirect()->route('admin.users.index')->with('success', "Utilisateur supprimer");
     }
 }

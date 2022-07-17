@@ -17,7 +17,7 @@
                             <div class="mb-1 flex flex-row sm:mb-0">
                                 <div class="relative">
                                     <select
-                                        class="block h-full w-full appearance-none appearance-none rounded-l border border-gray-400 bg-white py-2 px-4 pr-8 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none">
+                                        class="block h-full w-full appearance-none rounded-l border border-gray-400 bg-white py-2 px-4 pr-8 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none">
                                         <option>5</option>
                                         <option>10</option>
                                         <option>20</option>
@@ -71,7 +71,7 @@
                                             </th>
                                             <th
                                                 class="border-b-2 border-gray-200 bg-gray-100 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                                Name
+                                                Full Name
                                             </th>
 
                                             <th
@@ -88,7 +88,7 @@
                                             </th>
                                             <th
                                                 class="border-b-2 border-gray-200 bg-gray-100 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                                Status
+                                                Action
                                             </th>
                                         </tr>
                                     </thead>
@@ -101,18 +101,22 @@
                                                         <div class="h-10 w-10 flex-shrink-0">
                                                             <img class="h-full w-full rounded-full"
                                                                 src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80"
-                                                                alt="" />
-                                                        </div>
-                                                        <div class="ml-3">
-                                                            <p class="whitespace-no-wrap text-gray-900">
-                                                                Vera Carpenter
-                                                            </p>
+                                                                alt="{{ $user->fullname() }}" />
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="border-b border-gray-200 bg-white px-5 py-5 text-sm">
                                                     <p class="whitespace-no-wrap text-gray-900">
-                                                        {{ $user->name }}
+                                                        <a class="hover:underline"
+                                                            href="{{ route('admin.users.show', $user->id) }}">{{ $user->fullname() }}</a>
+                                                        @if ($user->id === Auth::user()->id)
+                                                            <span
+                                                                class="relative inline-block px-3 py-1 font-semibold leading-tight text-green-900">
+                                                                <span aria-hidden
+                                                                    class="absolute inset-0 rounded-full bg-green-200 opacity-50"></span>
+                                                                <span class="relative">You</span>
+                                                            </span>
+                                                        @endif
                                                     </p>
                                                 </td>
 
@@ -133,16 +137,23 @@
                                                 </td>
                                                 <td class="border-b border-gray-200 bg-white px-5 py-5 text-sm">
                                                     <p class="whitespace-no-wrap text-gray-900">
-                                                        {{ $user->created_at->format('D Y') }}
+                                                        {{ $user->created_at->format('M Y') }}
                                                     </p>
                                                 </td>
-                                                <td class="border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                                                    <span
-                                                        class="relative inline-block px-3 py-1 font-semibold leading-tight text-green-900">
-                                                        <span aria-hidden
-                                                            class="absolute inset-0 rounded-full bg-green-200 opacity-50"></span>
-                                                        <span class="relative">Activo</span>
-                                                    </span>
+                                                <td
+                                                    class="flex items-center border-b border-gray-200 bg-white px-5 py-5 text-sm">
+                                                    <a href="{{ route('admin.users.edit', $user->id) }}"
+                                                        class="m-1 rounded-md border border-transparent bg-blue-600 p-2 text-white transition-all duration-200 hover:border-blue-600 hover:bg-transparent hover:text-blue-600">Editer</a>
+                                                    @if (Auth::user()->canDoVIPActions())
+                                                        <form method="POST"
+                                                            action="{{ route('admin.users.destroy', $user->id) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                onclick="return confirm('voulez-vous vraiment supprimer cet utilisateur ?')"
+                                                                class="m-1 rounded-md border border-transparent bg-red-600 p-2 text-white transition-all duration-200 hover:border-red-600 hover:bg-transparent hover:text-red-600">Delete</button>
+                                                        </form>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @empty
