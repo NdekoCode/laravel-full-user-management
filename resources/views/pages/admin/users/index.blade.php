@@ -150,7 +150,7 @@
                                                 </td>
                                                 <td
                                                     class="flex items-center border-b border-gray-200 bg-white px-5 py-5 text-sm">
-                                                    @if (Auth::user()->id === $user->id || (Auth::user()->canDoVIPActions() && !$user->isSuperAdmin()))
+                                                    @if (Auth::user()->isCapableEdit($user))
                                                         <a href="{{ route('admin.users.edit', $user->id) }}"
                                                             class="m-1 rounded-md border border-transparent bg-blue-600 p-2 text-white transition-all duration-200 hover:border-blue-600 hover:bg-transparent hover:text-blue-600">Editer</a>
                                                     @else
@@ -158,7 +158,7 @@
                                                             class="m-1 rounded-md border border-transparent bg-blue-600 p-2 text-white transition-all duration-200 hover:border-blue-600 hover:bg-transparent hover:text-blue-600">View
                                                             Profile</a>
                                                     @endif
-                                                    @if (Auth::user()->canDoVIPActions() && Auth::user()->id !== $user->id && !$user->isSuperAdmin())
+                                                    @if (Auth::user()->isCapable($user))
                                                         <form method="POST"
                                                             action="{{ route('admin.users.destroy', $user->id) }}">
                                                             @csrf

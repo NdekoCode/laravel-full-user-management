@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -89,7 +90,7 @@ class User extends Authenticatable
      */
     public function canUpload()
     {
-        return $this->isEditor() || $this->isAdmin() || $this->isSuperAdmin();
+        return $this->hasAnyRole(['editor', 'admin', 'super_admin']);
     }
 
     /**
@@ -99,8 +100,28 @@ class User extends Authenticatable
      */
     public function canDoVIPActions()
     {
-        return $this->isAdmin() || $this->isSuperAdmin();
+        return $this->hasAnyRole(['admin', 'super_admin']);
     }
+
+    public function isCapableEdit(User $userEntry)
+    {
+        if ($this->id === $userEntry->id) {
+            return true;
+        }
+        return Gate::allows('is-priority', $userEntry);
+    }
+
+    public function isCapable(User $userEntry)
+    {
+        return Gate::allows('is-priority', $userEntry) && $userEntry->id !== $this->id;
+    }
+
+    public function hasAnyRole(array $roles)
+    {
+        return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
+
 
     /**
      * Recupere le role Admin
